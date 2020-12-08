@@ -11,7 +11,6 @@ usersRoutes.get('/users', (req, res) => {
 
 usersRoutes.get('/users/:id', (req, res) => {
   const user = users.find((item) => {
-    /* eslint no-underscore-dangle: ["error", { "allow": ["_id"] }] */
     const result = item._id === req.params.id;
     return result;
   });

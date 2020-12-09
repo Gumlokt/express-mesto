@@ -10,10 +10,7 @@ usersRoutes.get('/users', (req, res) => {
 });
 
 usersRoutes.get('/users/:id', (req, res) => {
-  const user = users.find((item) => {
-    const result = item._id === req.params.id;
-    return result;
-  });
+  const user = users.find((item) => item._id === req.params.id);
 
   if (user) {
     res.send(user);

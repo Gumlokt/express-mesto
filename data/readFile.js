@@ -10,6 +10,18 @@ module.exports = {
       console.log(err);
     }
 
-    return { message: 'Some error occurred. Possible, cannot find file to read. Check the console messages..' };
+    return [{ message: 'Some error occurred. Check the console messages..' }];
   },
 };
+
+// module.exports = {
+//   readFile: (filepath) => {
+//     let fileData = [];
+
+//     fs.readFile(filepath, { encoding: 'utf-8' }, (err, data) => {
+//       fileData = data;
+//     });
+
+//     return JSON.parse(fileData);
+//   },
+// };

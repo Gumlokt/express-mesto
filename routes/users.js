@@ -1,22 +1,34 @@
 const usersRoutes = require('express').Router();
 const path = require('path');
-const { readFile } = require('../data/readFile');
+const getDataFromFile = require('../helpers/files');
 
-const usersFilePath = path.join(__dirname, '../data/users.json');
-const users = readFile(usersFilePath);
+const usersFilePath = path.join(__dirname, '..', 'data', 'users.json');
+const getUsers = getDataFromFile(usersFilePath);
 
 usersRoutes.get('/users', (req, res) => {
-  res.send(users);
+  getUsers
+    .then((users) => {
+      res.status(200).send(users);
+    })
+    .catch((err) => {
+      res.status(400).send(err);
+    });
 });
 
 usersRoutes.get('/users/:id', (req, res) => {
-  const user = users.find((item) => item._id === req.params.id);
+  getUsers
+    .then((users) => {
+      const user = users.find((item) => item._id === req.params.id);
 
-  if (user) {
-    res.send(user);
-  } else {
-    res.status(404).send({ message: 'Нет пользователя с таким id' });
-  }
+      if (user) {
+        res.status(200).send(user);
+      } else {
+        res.status(404).send({ message: 'Нет пользователя с таким id' });
+      }
+    })
+    .catch((err) => {
+      res.status(400).send(err);
+    });
 });
 
 module.exports = usersRoutes;

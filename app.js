@@ -18,6 +18,14 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
+app.use((req, res, next) => {
+  req.user = {
+    _id: '5ffe535630e2bc02e4be2126',
+  };
+
+  next();
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', usersRoutes);
 app.use('/', cardsRoutes);

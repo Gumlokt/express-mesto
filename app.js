@@ -30,7 +30,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', usersRoutes);
 app.use('/', cardsRoutes);
 
-app.get('/*', (req, res) => {
+app.use((req, res) => {
   res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
 });
 

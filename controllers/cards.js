@@ -3,7 +3,7 @@ const Card = require('../models/card');
 module.exports.getCards = (req, res) => {
   Card.find({})
     .then((cards) => res.status(200).send({ data: cards }))
-    .catch((err) => res.status(404).send({ message: 'Ошибка поиска всех карточек' }));
+    .catch((err) => res.status(500).send({ message: err.message }));
 };
 
 module.exports.createCard = (req, res) => {
@@ -11,7 +11,7 @@ module.exports.createCard = (req, res) => {
 
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.status(200).send({ data: card }))
-    .catch((err) => res.status(400).send({ message: err.message }));
+    .catch((err) => res.status(500).send({ message: err.message }));
 };
 
 module.exports.removeCard = (req, res) => {
@@ -19,11 +19,12 @@ module.exports.removeCard = (req, res) => {
     .then((card) => {
       if (!card) {
         res.status(404).send({ message: 'Карточка с указанным ID отсутствует' });
+        return;
       }
 
       res.status(200).send({ data: card, message: 'Карточка удалена' });
     })
-    .catch((err) => res.status(404).send({ message: 'Карточка не найдена (задан не корректный ID)' }));
+    .catch((err) => res.status(500).send({ message: err.message }));
 };
 
 module.exports.setCardLike = (req, res) => {
@@ -31,15 +32,16 @@ module.exports.setCardLike = (req, res) => {
     .then((card) => {
       if (!card) {
         res.status(404).send({ message: 'Карточка с указанным ID отсутствует, поставить лайк карточке не удалось' });
+        return;
       }
 
       res.status(200).send({ data: card });
     })
-    .catch((err) => res.status(404).send({ message: 'Карточка не найдена (задан не корректный ID), поставить лайк карточке не удалось' }));
+    .catch((err) => res.status(500).send({ message: err.message }));
 };
 
 module.exports.unsetCardLike = (req, res) => {
   Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: req.user._id } }, { new: true })
     .then((card) => res.status(200).send({ data: card }))
-    .catch((err) => res.status(404).send({ message: 'Карточка не найдена (задан не корректный ID), убрать лайк с карточки не удалось' }));
+    .catch((err) => res.status(500).send({ message: err.message }));
 };

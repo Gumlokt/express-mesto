@@ -5,17 +5,18 @@ module.exports.getUser = (req, res) => {
     .then((user) => {
       if (!user) {
         res.status(404).send({ message: 'Пользователя с указанным ID нет в базе' });
+        return;
       }
 
       res.status(200).send({ data: user });
     })
-    .catch((err) => res.status(404).send({ message: 'Пользователя с указанным ID нет в базе (задан не корректный ID)' }));
+    .catch((err) => res.status(400).send({ message: err.message }));
 };
 
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then((users) => res.status(200).send({ data: users }))
-    .catch((err) => res.status(404).send({ message: 'Ошибка поиска всех пользователей' }));
+    .catch((err) => res.status(500).send({ message: err.message }));
 };
 
 module.exports.createUser = (req, res) => {
@@ -23,7 +24,7 @@ module.exports.createUser = (req, res) => {
 
   User.create({ name, about, avatar })
     .then((user) => res.status(200).send({ data: user }))
-    .catch((err) => res.status(400).send({ message: err.message }));
+    .catch((err) => res.status(500).send({ message: err.message }));
 };
 
 module.exports.updateUserProfile = (req, res) => {
@@ -34,11 +35,12 @@ module.exports.updateUserProfile = (req, res) => {
       .then((user) => {
         if (!user) {
           res.status(404).send({ message: 'Пользователь с указанным ID отсутствует' });
+          return;
         }
 
         res.status(200).send({ data: user });
       })
-      .catch((err) => res.status(404).send({ message: 'Пользователь с указанным ID отсутствует (задан не корректный ID)' }));
+      .catch((err) => res.status(500).send({ message: err.message }));
   } else {
     res.status(400).send({ message: 'Ошибка при обновлении профиля пользователя (не полные данные)' });
   }
@@ -52,11 +54,12 @@ module.exports.updateUserAvatar = (req, res) => {
       .then((user) => {
         if (!user) {
           res.status(404).send({ message: 'Пользователь с указанным ID отсутствует' });
+          return;
         }
 
         res.status(200).send({ data: user });
       })
-      .catch((err) => res.status(404).send({ message: 'Пользователь с указанным ID отсутствует (задан не корректный ID)' }));
+      .catch((err) => res.status(500).send({ message: err.message }));
   } else {
     res.status(400).send({ message: 'Ошибка при обновлении аватара пользователя (не задана ссылка)' });
   }

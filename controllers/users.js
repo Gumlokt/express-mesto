@@ -2,15 +2,23 @@ const User = require('../models/user');
 
 module.exports.getUser = (req, res) => {
   User.findById(req.params.userId)
+    .orFail(new Error('ErrorGettingUserProfile'))
     .then((user) => {
-      if (!user) {
-        res.status(404).send({ message: 'Пользователя с указанным ID нет в базе' });
+      res.status(200).send({ data: user });
+    })
+    .catch((err) => {
+      if (err.message === 'ErrorGettingUserProfile') {
+        res.status(404).send({ message: 'Пользователь с указанным ID отсутствует' });
         return;
       }
 
-      res.status(200).send({ data: user });
-    })
-    .catch((err) => res.status(400).send({ message: err.message }));
+      if (err.name === 'CastError') {
+        res.status(400).send({ message: 'Указан не валидный ID пользователя' });
+        return;
+      }
+
+      res.status(500).send({ message: `Что-то пошло не так... ${err.message}` });
+    });
 };
 
 module.exports.getUsers = (req, res) => {
@@ -24,43 +32,72 @@ module.exports.createUser = (req, res) => {
 
   User.create({ name, about, avatar })
     .then((user) => res.status(200).send({ data: user }))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(400).send({ message: `Данные не прошли валидацию: ${err.message}` });
+        return;
+      }
+
+      res.status(500).send({ message: `Что-то пошло не так... ${err.message}` });
+    });
 };
 
 module.exports.updateUserProfile = (req, res) => {
   const { name, about } = req.body;
 
-  if (name && about) {
-    User.findByIdAndUpdate(req.user._id, { name, about })
-      .then((user) => {
-        if (!user) {
-          res.status(404).send({ message: 'Пользователь с указанным ID отсутствует' });
-          return;
-        }
+  User.findByIdAndUpdate(
+    req.user._id,
+    { name, about },
+    { new: true, runValidators: true, upsert: true },
+  )
+    .orFail(new Error('ErrorUpdatingUserProfile'))
+    .then((user) => res.status(200).send({ data: user }))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(400).send({ message: `Данные не прошли валидацию: ${err.message}` });
+        return;
+      }
 
-        res.status(200).send({ data: user });
-      })
-      .catch((err) => res.status(500).send({ message: err.message }));
-  } else {
-    res.status(400).send({ message: 'Ошибка при обновлении профиля пользователя (не полные данные)' });
-  }
+      if (err.message === 'ErrorUpdatingUserProfile') {
+        res.status(404).send({ message: 'Пользователь с указанным ID отсутствует' });
+        return;
+      }
+
+      if (err.name === 'CastError') {
+        res.status(400).send({ message: 'Указан не валидный ID пользователя' });
+        return;
+      }
+
+      res.status(500).send({ message: `Что-то пошло не так... ${err.message}` });
+    });
 };
 
 module.exports.updateUserAvatar = (req, res) => {
   const { avatar } = req.body;
 
-  if (avatar) {
-    User.findByIdAndUpdate(req.user._id, { avatar })
-      .then((user) => {
-        if (!user) {
-          res.status(404).send({ message: 'Пользователь с указанным ID отсутствует' });
-          return;
-        }
+  User.findByIdAndUpdate(
+    req.user._id,
+    { avatar },
+    { new: true, runValidators: true, upsert: true },
+  )
+    .orFail(new Error('ErrorUpdatingUserAvatar'))
+    .then((user) => res.status(200).send({ data: user }))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(400).send({ message: `Данные не прошли валидацию: ${err.message}` });
+        return;
+      }
 
-        res.status(200).send({ data: user });
-      })
-      .catch((err) => res.status(500).send({ message: err.message }));
-  } else {
-    res.status(400).send({ message: 'Ошибка при обновлении аватара пользователя (не задана ссылка)' });
-  }
+      if (err.message === 'ErrorUpdatingUserAvatar') {
+        res.status(404).send({ message: 'Пользователь с указанным ID отсутствует' });
+        return;
+      }
+
+      if (err.name === 'CastError') {
+        res.status(400).send({ message: 'Указан не валидный ID пользователя' });
+        return;
+      }
+
+      res.status(500).send({ message: `Что-то пошло не так... ${err.message}` });
+    });
 };
